@@ -59,9 +59,15 @@
 		loadingTarif = true;
 		try {
 			const response = await apiClient.getTarif(1, 50);
+			console.log('API Response:', response);
+
 			if (response.success && response.data) {
-				const data = response.data as PaginatedResponse<TarifData>;
-				tarifOptions = data.data;
+				if (Array.isArray(response.data)) {
+					tarifOptions = response.data as TarifData[];
+				} else {
+					const paginatedData = response.data as PaginatedResponse<TarifData>;
+					tarifOptions = paginatedData.data;
+				}
 			}
 		} catch (error) {
 			console.error('Failed to load tarif options:', error);
@@ -203,7 +209,7 @@
 
 {#if showSuccess}
 	<!-- Success Modal -->
-	<div class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
 		<div class="mx-4 w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
 			<div class="text-center">
 				<div
@@ -286,7 +292,7 @@
 					maxlength={100}
 				/>
 
-				<!-- Nomor KWH with Generate Button -->
+				<!-- Improved Nomor KWH with Generate Button -->
 				<div>
 					<label for="nomor_kwh" class="mb-2 block text-sm font-medium text-gray-700">
 						Nomor KWH <span class="text-red-500">*</span>
@@ -304,15 +310,24 @@
 							maxlength="15"
 							pattern="[0-9]*"
 							inputmode="numeric"
+							autocomplete="off"
 						/>
 						<button
 							type="button"
 							on:click={autoGenerateKWH}
 							disabled={isLoading}
-							class="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-300 disabled:opacity-50"
+							class="flex items-center justify-center rounded-lg bg-gray-200 px-4 py-3 text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 							title="Generate nomor KWH otomatis"
+							aria-label="Generate nomor KWH otomatis"
+							style="z-index: 10; position: relative;"
 						>
-							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="h-4 w-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+							>
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"
@@ -320,10 +335,11 @@
 									d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
 								/>
 							</svg>
+							<span class="ml-1 hidden sm:inline">Generate</span>
 						</button>
 					</div>
 					{#if errors.nomor_kwh}
-						<p class="mt-1 text-sm text-red-500">{errors.nomor_kwh}</p>
+						<p class="mt-1 text-sm text-red-500" role="alert">{errors.nomor_kwh}</p>
 					{/if}
 					<p class="mt-1 text-xs text-gray-500">Nomor meter KWH (10-15 digit angka)</p>
 				</div>
