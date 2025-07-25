@@ -247,7 +247,7 @@ export class ApiClient {
 
 	// =================== CUSTOMER AUTH ===================
 	async customerRegister(data: PelangganData): Promise<ApiResponse<PelangganProfile>> {
-		return this.request<PelangganProfile>('/customer/register', {
+		return this.request<PelangganProfile>('/customer/register-public', {
 			method: 'POST',
 			body: JSON.stringify(data)
 		});
