@@ -63,7 +63,6 @@
 							{item.label}
 						</a>
 					{/each}
-					<!-- <a href="/admin" class="btn btn-primary text-sm"> Admin </a> -->
 				</div>
 
 				<!-- Mobile menu button -->
@@ -109,13 +108,6 @@
 							{item.label}
 						</a>
 					{/each}
-					<a
-						href="/admin"
-						on:click={closeMenu}
-						class="block px-3 py-2 font-medium text-primary-600"
-					>
-						Admin Login
-					</a>
 				</div>
 			</div>
 		{/if}
