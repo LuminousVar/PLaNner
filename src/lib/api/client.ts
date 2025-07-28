@@ -644,12 +644,69 @@ export class ApiClient {
 
 	// Utility method to check if user is authenticated
 	isAuthenticated(): boolean {
-		return this.authToken !== null;
+		return this.authToken !== null && this.authToken.length > 0;
 	}
 
 	// Get current auth token
 	getAuthToken(): string | null {
 		return this.authToken;
+	}
+
+	getUserType(): 'admin' | 'customer' | null {
+		if (typeof window !== 'undefined') {
+			return localStorage.getItem('user_type') as 'admin' | 'customer' | null;
+		}
+
+		return null;
+	}
+
+	async logout(): Promise<ApiResponse<null>> {
+		const userType = this.getUserType();
+
+		try {
+			let response: ApiResponse<null>;
+
+			if (userType === 'admin') {
+				response = await this.adminLogout();
+			} else if (userType === 'customer') {
+				response = await this.customerLogout();
+			} else {
+				// If no user type, just clear local data
+				this.clearLocalData();
+				return {
+					success: true,
+					message: 'Logout berhasil'
+				};
+			}
+
+			return response;
+		} catch (err) {
+			if (env.DEBUG) {
+				console.error('Logout error:', err);
+			}
+
+			this.clearLocalData();
+			return {
+				success: true,
+				message: 'Logout berhasil (offline)',
+				error: 'Server tidak dapat dijangkau'
+			};
+		}
+	}
+
+	// Clear local authentication data
+	private clearLocalData(): void {
+		this.setAuthToken(null);
+
+		if (typeof window !== 'undefined') {
+			localStorage.removeItem('auth_type');
+			localStorage.removeItem('user_data');
+		}
+	}
+
+	forceLogout(): void {
+		this.clearLocalData();
+		console.log('Force Logout has completed.');
 	}
 
 	// Method to retry failed requests with exponential backoff
@@ -696,6 +753,19 @@ export class ApiClient {
 				error: 'Maximum retries exceeded'
 			}
 		);
+	}
+
+	clearSession(): void {
+		this.forceLogout();
+
+		const keysToRemove: string[] = [];
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key && (key.startsWith('planner_') || key.startsWith('auth_') || key.includes('user'))) {
+				keysToRemove.push(key);
+			}
+		}
+		keysToRemove.forEach((key) => localStorage.removeItem(key));
 	}
 }
 

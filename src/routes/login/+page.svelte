@@ -16,17 +16,14 @@
 
 	let errors: Record<string, string> = {};
 	let isLoading = false;
+	let isAlreadyLoggedIn = false;
+	let isLoggingOut = false;
 
 	onMount(() => {
-		// Check if already authenticated
+		// Check if already authenticated but don't auto-redirect
 		if (apiClient.isAuthenticated()) {
-			// Redirect based on current URL or stored user type
-			const currentPath = window.location.pathname;
-			if (currentPath.includes('/admin')) {
-				goto('/admin');
-			} else {
-				goto('/customer');
-			}
+			isAlreadyLoggedIn = true;
+			// Don't auto-redirect, just show status
 		}
 	});
 
@@ -87,6 +84,44 @@
 		formData.password = '';
 		errors = {};
 	}
+
+	function goToDashboard() {
+		const userType = apiClient.getUserType();
+		if (userType === 'admin') {
+			goto('/admin');
+		} else {
+			goto('/customer');
+		}
+	}
+
+	async function logout() {
+		isLoggingOut = true;
+
+		try {
+			// Try server logout first (if you have the endpoint)
+			await apiClient.logout();
+		} catch (error) {
+			// If server logout fails, still clear client data
+			apiClient.forceLogout();
+		}
+
+		// Update UI state
+		isAlreadyLoggedIn = false;
+		isLoggingOut = false;
+
+		// Reset form
+		formData.username = '';
+		formData.password = '';
+		errors = {};
+	}
+
+	function clearAllData() {
+		apiClient.clearSession();
+		isAlreadyLoggedIn = false;
+		formData.username = '';
+		formData.password = '';
+		errors = {};
+	}
 </script>
 
 <svelte:head>
@@ -108,6 +143,59 @@
 					: 'Masuk ke akun pelanggan Anda'}
 			</p>
 		</div>
+
+		<!-- Already Logged In Alert -->
+		{#if isAlreadyLoggedIn}
+			<div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+				<div class="flex items-center justify-between">
+					<div class="flex">
+						<svg
+							class="mr-3 h-5 w-5 text-blue-400"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+						<div>
+							<h3 class="text-sm font-medium text-blue-800">Sudah Login</h3>
+							<p class="mt-1 text-sm text-blue-700">
+								Anda sudah login sebagai {apiClient.getUserType() || 'user'}
+							</p>
+						</div>
+					</div>
+				</div>
+				<div class="mt-4 flex flex-wrap gap-2">
+					<button
+						on:click={goToDashboard}
+						class="rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+						disabled={isLoggingOut}
+					>
+						Ke Dashboard
+					</button>
+					<button
+						on:click={logout}
+						class="rounded-md border border-blue-300 px-3 py-1 text-sm text-blue-700 hover:bg-blue-100 disabled:opacity-50"
+						disabled={isLoggingOut}
+					>
+						{isLoggingOut ? 'Logout...' : 'Logout'}
+					</button>
+					<button
+						on:click={clearAllData}
+						class="rounded-md border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50 disabled:opacity-50"
+						disabled={isLoggingOut}
+						title="Hapus semua data tersimpan"
+					>
+						Clear All
+					</button>
+				</div>
+			</div>
+		{/if}
 
 		<!-- Login Type Switcher -->
 		<div class="mb-6">
