@@ -12,17 +12,27 @@
 	const customerNavItems: Array<{ href: string; label: string; icon: IconType }> = [
 		{ href: '/customer', label: 'Dashboard', icon: 'dashboard' },
 		{ href: '/customer/tagihan', label: 'Tagihan Saya', icon: 'bill' },
-		{ href: '/customer/pembayaran', label: 'Riwayat Pembayaran', icon: 'payment' },
+		{ href: '/customer/payment', label: 'Pembayaran', icon: 'payment' },
 		{ href: '/customer/penggunaan', label: 'Riwayat Penggunaan', icon: 'chart' },
 		{ href: '/customer/profile', label: 'Profil', icon: 'user' }
 	];
 
 	onMount(() => {
-		userType = apiClient.getUserType();
+		console.log('=== Layout Mount Debug ===');
+		console.log('Current URL:', $page.url.pathname);
+		console.log('localStorage user_type:', localStorage.getItem('user_type'));
+		console.log('typeof localStorage value:', typeof localStorage.getItem('user_type'));
 
-		// Only allow customer access
+		userType = apiClient.getUserType();
+		console.log('getUserType() result:', userType);
+		console.log('userType === "customer":', userType === 'customer');
+		console.log('userType !== "customer":', userType !== 'customer');
+
 		if (userType !== 'customer') {
+			console.log('🚨 REDIRECTING TO LOGIN because userType is not customer');
 			goto('/login');
+		} else {
+			console.log('✅ Access granted as customer');
 		}
 	});
 
@@ -92,6 +102,7 @@
 					on:click={handleLogout}
 					class="p-2 text-gray-400 transition-colors hover:text-red-600"
 					title="Logout"
+					aria-label="Logout button"
 				>
 					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
