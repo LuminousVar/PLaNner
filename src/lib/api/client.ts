@@ -80,6 +80,15 @@ export class ApiClient {
 			// Add auth token if available
 			if (this.authToken) {
 				headers['Authorization'] = `Bearer ${this.authToken}`;
+			} else {
+				if (typeof window !== 'undefined') {
+					window.location.href = '/login';
+					return Promise.reject({
+						success: false,
+						message: 'Unauthorized: No auth token',
+						error: 'No auth token'
+					});
+				}
 			}
 
 			// Add CSRF token if available
@@ -699,7 +708,7 @@ export class ApiClient {
 		this.setAuthToken(null);
 
 		if (typeof window !== 'undefined') {
-			localStorage.removeItem('auth_type');
+			localStorage.removeItem('user_type');
 			localStorage.removeItem('user_data');
 		}
 	}
