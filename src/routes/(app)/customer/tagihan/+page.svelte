@@ -49,41 +49,36 @@
 		{ value: '12', label: 'Desember' }
 	];
 
-	onMount(async () => {
-		await loadTagihan();
-	});
+	onMount(loadTagihan);
 
-	async function loadTagihan(page = 1): Promise<void> {
+	async function loadTagihan() {
 		state.loading = true;
 		state.error = null;
-
 		try {
-			const response = await apiClient.getCustomerTagihanList(page, 10, state.selectedStatus);
-
-			if (response.success && response.data) {
-				state.data = response.data.data;
-				state.currentPage = response.data.pagination.current_page;
-				state.totalPages = response.data.pagination.total_pages;
-				state.totalItems = response.data.pagination.total_items;
+			const res = await apiClient.getCustomerTagihan(
+				state.selectedStatus,
+				state.selectedBulan,
+				state.selectedTahun
+			);
+			if (res.success && res.data) {
+				state.data = res.data;
 			} else {
-				state.error = response.message || 'Gagal memuat data tagihan';
+				state.error = res.message || 'Gagal memuat data tagihan';
 			}
-		} catch (err) {
-			console.error('Failed to load tagihan:', err);
+		} catch (e) {
 			state.error = 'Terjadi kesalahan saat memuat data tagihan';
 		} finally {
 			state.loading = false;
 		}
 	}
 
-	async function handleFilterChange(): Promise<void> {
-		state.currentPage = 1;
-		await loadTagihan(1);
+	function handleFilterChange() {
+		loadTagihan();
 	}
 
 	async function handlePageChange(page: number): Promise<void> {
 		if (page >= 1 && page <= state.totalPages) {
-			await loadTagihan(page);
+			await loadTagihan();
 		}
 	}
 
@@ -156,7 +151,7 @@
 					id="status"
 					bind:value={state.selectedStatus}
 					on:change={handleFilterChange}
-					class="mt-1 block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+					class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
 				>
 					<option value="">Semua Status</option>
 					<option value="Lunas">Lunas</option>
@@ -170,7 +165,7 @@
 					id="bulan"
 					bind:value={state.selectedBulan}
 					on:change={handleFilterChange}
-					class="mt-1 block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+					class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
 				>
 					{#each monthOptions as option}
 						<option value={option.value}>{option.label}</option>
@@ -184,7 +179,7 @@
 					id="tahun"
 					bind:value={state.selectedTahun}
 					on:change={handleFilterChange}
-					class="mt-1 block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+					class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
 				>
 					<option value="">Semua Tahun</option>
 					{#each yearOptions as year}
@@ -201,7 +196,7 @@
 						state.selectedTahun = '';
 						handleFilterChange();
 					}}
-					class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+					class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 				>
 					Reset Filter
 				</button>
@@ -240,7 +235,7 @@
 			</div>
 			<div class="mt-4">
 				<button
-					on:click={() => loadTagihan(state.currentPage)}
+					on:click={() => loadTagihan()}
 					class="rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-800 hover:bg-red-200"
 				>
 					Coba Lagi
@@ -278,7 +273,7 @@
 									{tagihan.tahun}
 								</h3>
 								<span
-									class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold {getStatusBadge(
+									class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadge(
 										tagihan.status
 									).class}"
 								>

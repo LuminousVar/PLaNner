@@ -4,7 +4,31 @@
 	import { Formatter } from '$lib/utils/formatters';
 	import type { LaporanPenggunaan } from '$lib/types';
 
-	let penggunaanData: LaporanPenggunaan[] = [];
+	type PenggunaanItem = {
+		id_penggunaan: number;
+		id_pelanggan: number;
+		bulan: string;
+		tahun: string;
+		meter_awal: number;
+		meter_akhir: number;
+		jumlah_kwh: number;
+		pelanggan: {
+			id_pelanggan: number;
+			username: string;
+			password: string;
+			nomor_kwh: string;
+			nama_pelanggan: string;
+			alamat: string;
+			id_tarif: number;
+			tarif: {
+				id_tarif: number;
+				daya: number;
+				tarif_perkwh: number;
+			};
+		};
+	};
+
+	let penggunaanData: PenggunaanItem[] = [];
 	let loading = true;
 	let error: string | null = null;
 
@@ -19,7 +43,11 @@
 		try {
 			const response = await apiClient.getCustomerLaporanPenggunaan({ limit: 12 });
 			if (response.success && response.data) {
-				penggunaanData = response.data;
+				const arr = Array.isArray(response.data) ? response.data : response.data.penggunaan;
+				penggunaanData = arr.map((item: any) => ({
+					...item,
+					jumlah_kwh: item.meter_akhir - item.meter_awal
+				}));
 			} else {
 				error = response.message || 'Gagal memuat data penggunaan';
 			}
@@ -243,26 +271,28 @@
 						{#each penggunaanData as usage}
 							<tr class="hover:bg-gray-50">
 								<td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-									{formatMonth(usage.bulan)}
+									{formatMonth(Number(usage.bulan))}
 									{usage.tahun}
 								</td>
 								<td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
 									<div class="flex items-center">
-										<span class="mr-2">{usage.jumlah_kwh}</span>
-										<!-- Simple bar indicator -->
+										<span class="mr-2">{usage.meter_akhir - usage.meter_awal}</span>
 										<div class="h-2 w-20 flex-1 rounded-full bg-gray-200">
 											<div
 												class="h-2 rounded-full bg-blue-600"
-												style="width: {(usage.jumlah_kwh / highestUsage) * 100}%"
+												style="width: {((usage.meter_akhir - usage.meter_awal) / highestUsage) *
+													100}%"
 											></div>
 										</div>
 									</div>
 								</td>
 								<td class="px-6 py-4 text-sm whitespace-nowrap text-gray-900">
-									{Formatter.currency(usage.tarif_perkwh)}
+									{Formatter.currency(usage.pelanggan.tarif.tarif_perkwh)}
 								</td>
 								<td class="px-6 py-4 text-sm font-medium whitespace-nowrap text-gray-900">
-									{Formatter.currency(usage.total_bayar)}
+									{Formatter.currency(
+										(usage.meter_akhir - usage.meter_awal) * usage.pelanggan.tarif.tarif_perkwh
+									)}
 								</td>
 							</tr>
 						{/each}
