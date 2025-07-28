@@ -18,7 +18,6 @@ import type {
 	PenggunaanFilterParams,
 	TagihanData,
 	GenerateTagihanData,
-	// TagihanStatus,
 	UpdateTagihanStatusData,
 	TagihanFilterParams,
 	PembayaranData,
@@ -45,6 +44,8 @@ export class ApiClient {
 
 	constructor() {
 		this.baseUrl = env.API_BASE_URL;
+		// Initialize token immediately in constructor
+		this.initializeToken();
 	}
 
 	setAuthToken(token: string | null): void {
@@ -55,6 +56,7 @@ export class ApiClient {
 				localStorage.setItem('auth_token', token);
 			} else {
 				localStorage.removeItem('auth_token');
+				localStorage.removeItem('user_type'); // Clear user type as well
 			}
 		}
 	}
@@ -77,17 +79,38 @@ export class ApiClient {
 				'Content-Type': 'application/json'
 			};
 
-			// Add auth token if available
-			if (this.authToken) {
-				headers['Authorization'] = `Bearer ${this.authToken}`;
-			} else {
-				if (typeof window !== 'undefined') {
-					window.location.href = '/login';
-					return Promise.reject({
-						success: false,
-						message: 'Unauthorized: No auth token',
-						error: 'No auth token'
-					});
+			// Special handling for public endpoints that don't need auth
+			const publicEndpoints = [
+				'/health',
+				'/admin/bootstrap',
+				'/admin/login',
+				'/customer/login',
+				'/customer/register-public'
+			];
+
+			const isPublicEndpoint = publicEndpoints.some((pe) => endpoint.includes(pe));
+
+			// Add auth token if available and not a public endpoint
+			if (!isPublicEndpoint) {
+				if (this.authToken) {
+					headers['Authorization'] = `Bearer ${this.authToken}`;
+				} else {
+					// Check localStorage one more time before redirecting
+					if (typeof window !== 'undefined') {
+						const storedToken = localStorage.getItem('auth_token');
+						if (storedToken) {
+							this.authToken = storedToken;
+							headers['Authorization'] = `Bearer ${storedToken}`;
+						} else {
+							// Only redirect if we're in browser and it's not a public endpoint
+							window.location.href = '/login';
+							return Promise.reject({
+								success: false,
+								message: 'Unauthorized: No auth token',
+								error: 'No auth token'
+							});
+						}
+					}
 				}
 			}
 
@@ -103,6 +126,7 @@ export class ApiClient {
 
 			if (env.DEBUG) {
 				console.log(`API Request: ${options.method || 'GET'} ${url}`);
+				console.log('Headers:', headers);
 				if (options.body) {
 					console.log('Request Body:', options.body);
 				}
@@ -123,14 +147,16 @@ export class ApiClient {
 			if (contentType && contentType.includes('application/json')) {
 				data = await response.json();
 			} else {
-				data = { message: await response.text() };
+				const textData = await response.text();
+				data = { message: textData };
 			}
 
 			if (!response.ok) {
 				// Handle 401 Unauthorized
 				if (response.status === 401) {
+					console.warn('401 Unauthorized - clearing auth token');
 					this.setAuthToken(null);
-					if (typeof window !== 'undefined') {
+					if (typeof window !== 'undefined' && !isPublicEndpoint) {
 						window.location.href = '/login';
 					}
 				}
@@ -197,6 +223,9 @@ export class ApiClient {
 		// Auto-set token if login successful
 		if (response.success && response.data?.token) {
 			this.setAuthToken(response.data.token);
+			if (typeof window !== 'undefined') {
+				localStorage.setItem('user_type', 'admin');
+			}
 		}
 
 		return response;
@@ -271,6 +300,9 @@ export class ApiClient {
 		// Auto-set token if login successful
 		if (response.success && response.data?.token) {
 			this.setAuthToken(response.data.token);
+			if (typeof window !== 'undefined') {
+				localStorage.setItem('user_type', 'customer');
+			}
 		}
 
 		return response;
@@ -708,6 +740,7 @@ export class ApiClient {
 		this.setAuthToken(null);
 
 		if (typeof window !== 'undefined') {
+			localStorage.removeItem('auth_token');
 			localStorage.removeItem('user_type');
 			localStorage.removeItem('user_data');
 		}
@@ -778,10 +811,5 @@ export class ApiClient {
 	}
 }
 
-// Create singleton instance and initialize token
+// Create singleton instance
 export const apiClient = new ApiClient();
-
-// Initialize token from localStorage when the module loads
-if (typeof window !== 'undefined') {
-	apiClient.initializeToken();
-}
