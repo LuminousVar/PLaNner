@@ -86,7 +86,8 @@ export class ApiClient {
 				'/admin/login',
 				'/customer/login',
 				'/customer/register-public',
-				'/tarif'
+				'/tarif',
+				'/api/tarif'
 			];
 
 			const isPublicEndpoint = publicEndpoints.some((pe) => endpoint.includes(pe));

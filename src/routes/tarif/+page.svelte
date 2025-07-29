@@ -27,15 +27,17 @@
 			const response = await apiClient.getTarif(page, 12);
 
 			if (response.success && response.data) {
-				const data = response.data as PaginatedResponse<TarifData>;
-				tarifData = data.data;
-				currentPage = data.pagination.current_page;
-				totalPages = data.pagination.total_pages;
-				totalItems = data.pagination.total_items;
+				const data = response.data as any;
+				tarifData = data.data || data;
+				currentPage = data.pagination?.current_page ?? 1;
+				totalPages = data.pagination?.total_pages ?? 1;
+				totalItems = data.pagination?.total_items ?? tarifData.length;
 			} else {
+				console.error('Tarif fetch error:', response.message);
 				error = 'Gagal memuat data tarif';
 			}
 		} catch (err) {
+			console.error(`Tarif fetch error: ${err}`);
 			error = 'Terjadi kesalahan koneksi';
 		} finally {
 			loading = false;
@@ -52,8 +54,9 @@
 		goto('/register');
 	}
 
-	function getDayaCategory(daya: string): { label: string; color: string; icon: IconType } {
-		const power = parseInt(daya.replace(/\D/g, ''));
+	function getDayaCategory(daya: unknown): { label: string; color: string; icon: IconType } {
+		const dayaStr = String(daya ?? '');
+		const power = parseInt(dayaStr.replace(/\D/g, ''));
 		if (power <= 900) return { label: 'Rumah Tangga', color: 'blue', icon: 'home' as IconType };
 		if (power <= 2200) return { label: 'Bisnis Kecil', color: 'green', icon: 'shop' as IconType };
 		if (power <= 6600)
