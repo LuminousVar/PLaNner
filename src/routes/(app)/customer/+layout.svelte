@@ -17,7 +17,9 @@
 		{ href: '/customer/profile', label: 'Profil', icon: 'user' }
 	];
 
-	onMount(() => {
+	let userName = '';
+
+	onMount(async () => {
 		console.log('=== Layout Mount Debug ===');
 		console.log('Current URL:', $page.url.pathname);
 		console.log('localStorage user_type:', localStorage.getItem('user_type'));
@@ -33,6 +35,17 @@
 			goto('/login');
 		} else {
 			console.log('✅ Access granted as customer');
+		}
+
+		if (userType === 'customer') {
+			try {
+				const res = await apiClient.getCustomerProfile();
+				if (res.success && res.data) {
+					userName = res.data.nama_pelanggan;
+				}
+			} catch (e) {
+				userName = 'Customer';
+			}
 		}
 	});
 
@@ -94,9 +107,16 @@
 			<div class="flex items-center justify-between">
 				<div class="flex items-center">
 					<div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600">
-						<span class="text-xs font-bold text-white">C</span>
+						<svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+							/>
+						</svg>
 					</div>
-					<span class="ml-3 text-sm font-medium text-gray-700">Customer</span>
+					<span class="ml-3 text-sm font-medium text-gray-700">{userName}</span>
 				</div>
 				<button
 					on:click={handleLogout}

@@ -135,10 +135,11 @@
 		return months[month - 1] || month.toString();
 	}
 
-	function calculateTotal(tagihan: TagihanData): number {
-		// Cek tarif di objek tarif atau langsung di tagihan
-		const tarif = tagihan.tarif?.tarif_perkwh ?? tagihan.tarif_perkwh ?? 0;
-		return tagihan.jumlah_meter * tarif;
+	function calculateTotal(tagihan: any) {
+		// Ambil jumlah_meter dan tarif_perkwh dari struktur data response API
+		const jumlah_meter = tagihan.jumlah_meter ?? 0;
+		const tarif_perkwh = tagihan.pelanggan?.tarif?.tarif_perkwh ?? 0;
+		return jumlah_meter * tarif_perkwh;
 	}
 </script>
 
@@ -264,7 +265,7 @@
 								<div>
 									<div class="text-gray-500">Tarif per kWh</div>
 									<div class="font-medium">
-										{formatCurrency(tagihan.tarif?.tarif_perkwh ?? tagihan.tarif_perkwh ?? 0)}
+										{formatCurrency(tagihan.pelanggan?.tarif?.tarif_perkwh ?? 0)}
 									</div>
 								</div>
 							</div>
