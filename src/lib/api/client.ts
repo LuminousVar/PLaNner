@@ -85,7 +85,8 @@ export class ApiClient {
 				'/admin/bootstrap',
 				'/admin/login',
 				'/customer/login',
-				'/customer/register-public'
+				'/customer/register-public',
+				'/tarif'
 			];
 
 			const isPublicEndpoint = publicEndpoints.some((pe) => endpoint.includes(pe));
@@ -590,6 +591,16 @@ export class ApiClient {
 		});
 	}
 
+	async updateCustomerProfile(data: {
+		nama_pelanggan: string;
+		alamat: string;
+	}): Promise<ApiResponse<PelangganProfile>> {
+		return this.request<PelangganProfile>('/customer/profile', {
+			method: 'PUT',
+			body: JSON.stringify(data)
+		});
+	}
+
 	async getCustomerPembayaran(
 		page = 1,
 		limit = 10,
@@ -605,6 +616,13 @@ export class ApiClient {
 
 	async getCustomerPembayaranById(id: number): Promise<ApiResponse<PembayaranData>> {
 		return this.request<PembayaranData>(`/customer/pembayaran/${id}`);
+	}
+
+	async createCustomerPembayaran(data: CreatePembayaranData): Promise<ApiResponse<PembayaranData>> {
+		return this.request<PembayaranData>('/customer/pembayaran', {
+			method: 'POST',
+			body: JSON.stringify(data)
+		});
 	}
 
 	// =================== DASHBOARD ===================

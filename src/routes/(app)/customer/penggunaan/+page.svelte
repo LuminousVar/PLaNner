@@ -42,14 +42,28 @@
 
 		try {
 			const response = await apiClient.getCustomerLaporanPenggunaan({ limit: 12 });
-			if (response.success && response.data) {
-				const arr = Array.isArray(response.data) ? response.data : response.data.penggunaan;
-				penggunaanData = arr.map((item: any) => ({
+			// Define the expected structure
+			type PenggunaanResponse = {
+				success: boolean;
+				data?: PenggunaanItem[] | { penggunaan: PenggunaanItem[] };
+				message?: string;
+			};
+
+			const res = response as PenggunaanResponse;
+
+			let arr: PenggunaanItem[] = [];
+			if (res.success && res.data) {
+				if (Array.isArray(res.data)) {
+					arr = res.data;
+				} else if ('penggunaan' in res.data && Array.isArray(res.data.penggunaan)) {
+					arr = res.data.penggunaan;
+				}
+				penggunaanData = arr.map((item) => ({
 					...item,
 					jumlah_kwh: item.meter_akhir - item.meter_awal
 				}));
 			} else {
-				error = response.message || 'Gagal memuat data penggunaan';
+				error = res.message || 'Gagal memuat data penggunaan';
 			}
 		} catch (err) {
 			console.error('Failed to load penggunaan:', err);

@@ -1,4 +1,5 @@
 import type { BaseEntity } from './base';
+import type { TarifData } from './tarif';
 import type { PelangganProfile } from './user';
 
 export type TagihanStatus = 'Lunas' | 'Belum Lunas';
@@ -11,6 +12,8 @@ export interface TagihanData extends BaseEntity {
 	jumlah_meter: number;
 	status: TagihanStatus;
 	pelanggan?: PelangganProfile;
+	tarif?: TarifData;
+	tarif_perkwh?: number;
 }
 
 export interface GenerateTagihanData {

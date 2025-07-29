@@ -78,6 +78,7 @@
 
 	async function handlePageChange(page: number): Promise<void> {
 		if (page >= 1 && page <= state.totalPages) {
+			state.currentPage = page;
 			await loadTagihan();
 		}
 	}
@@ -151,7 +152,7 @@
 					id="status"
 					bind:value={state.selectedStatus}
 					on:change={handleFilterChange}
-					class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+					class="mt-1 block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
 				>
 					<option value="">Semua Status</option>
 					<option value="Lunas">Lunas</option>
@@ -165,7 +166,7 @@
 					id="bulan"
 					bind:value={state.selectedBulan}
 					on:change={handleFilterChange}
-					class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+					class="mt-1 block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
 				>
 					{#each monthOptions as option}
 						<option value={option.value}>{option.label}</option>
@@ -179,7 +180,7 @@
 					id="tahun"
 					bind:value={state.selectedTahun}
 					on:change={handleFilterChange}
-					class="mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+					class="mt-1 block w-full rounded-md border-gray-300 py-2 pr-10 pl-3 text-base focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
 				>
 					<option value="">Semua Tahun</option>
 					{#each yearOptions as year}
@@ -196,7 +197,7 @@
 						state.selectedTahun = '';
 						handleFilterChange();
 					}}
-					class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					class="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
 				>
 					Reset Filter
 				</button>
@@ -273,7 +274,7 @@
 									{tagihan.tahun}
 								</h3>
 								<span
-									class="inline-flex rounded-full px-2 text-xs font-semibold leading-5 {getStatusBadge(
+									class="inline-flex rounded-full px-2 text-xs leading-5 font-semibold {getStatusBadge(
 										tagihan.status
 									).class}"
 								>

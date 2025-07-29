@@ -8,6 +8,11 @@
 	let loading = true;
 	let error: string | null = null;
 
+	let isEditing = false;
+	let editNama = '';
+	let editAlamat = '';
+	let saving = false;
+
 	onMount(async () => {
 		await loadProfile();
 	});
@@ -28,6 +33,42 @@
 			error = 'Terjadi kesalahan saat memuat profil';
 		} finally {
 			loading = false;
+		}
+	}
+
+	function startEdit() {
+		if (profile) {
+			editNama = profile.nama_pelanggan;
+			editAlamat = profile.alamat;
+			isEditing = true;
+		}
+	}
+
+	function cancelEdit() {
+		isEditing = false;
+	}
+
+	async function saveEdit() {
+		if (!profile) return;
+		saving = true;
+		error = null;
+		try {
+			const response = await apiClient.updateCustomerProfile({
+				nama_pelanggan: editNama,
+				alamat: editAlamat
+			});
+			if (response.success) {
+				profile = { ...profile, nama_pelanggan: editNama, alamat: editAlamat };
+				isEditing = false;
+				error = null; // pastikan error direset
+			} else {
+				error = response.message || 'Gagal memperbarui profil';
+			}
+		} catch (err) {
+			console.error('Failed to update profile:', err);
+			error = 'Terjadi kesalahan saat memperbarui profil';
+		} finally {
+			saving = false;
 		}
 	}
 </script>
@@ -83,35 +124,54 @@
 			</div>
 		</div>
 	{:else if profile}
-		<!-- Profile Card -->
 		<div class="rounded-lg bg-white p-6 shadow">
 			<h3 class="mb-6 text-lg font-medium text-gray-900">Informasi Pelanggan</h3>
-
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 				<div>
 					<label class="block text-sm font-medium text-gray-500">Nama Pelanggan</label>
-					<p class="mt-1 text-sm text-gray-900">{profile.nama_pelanggan}</p>
+					{#if isEditing}
+						<input class="mt-1 w-full rounded border px-2 py-1" bind:value={editNama} />
+					{:else}
+						<p class="mt-1 text-sm text-gray-900">{profile.nama_pelanggan}</p>
+					{/if}
 				</div>
-
 				<div>
 					<label class="block text-sm font-medium text-gray-500">Username</label>
 					<p class="mt-1 text-sm text-gray-900">{profile.username}</p>
 				</div>
-
 				<div>
 					<label class="block text-sm font-medium text-gray-500">Nomor KWH</label>
 					<p class="mt-1 font-mono text-sm text-gray-900">{profile.nomor_kwh}</p>
 				</div>
-
-				<div>
-					<label class="block text-sm font-medium text-gray-500">ID Pelanggan</label>
-					<p class="mt-1 text-sm text-gray-900">#{profile.id_pelanggan}</p>
-				</div>
-
 				<div class="md:col-span-2">
 					<label class="block text-sm font-medium text-gray-500">Alamat</label>
-					<p class="mt-1 text-sm text-gray-900">{profile.alamat}</p>
+					{#if isEditing}
+						<input class="mt-1 w-full rounded border px-2 py-1" bind:value={editAlamat} />
+					{:else}
+						<p class="mt-1 text-sm text-gray-900">{profile.alamat}</p>
+					{/if}
 				</div>
+			</div>
+			<div class="mt-4">
+				{#if isEditing}
+					<button
+						class="mr-2 rounded bg-blue-600 px-4 py-2 text-white"
+						on:click={saveEdit}
+						disabled={saving}
+					>
+						{saving ? 'Menyimpan...' : 'Simpan'}
+					</button>
+					<button class="rounded bg-gray-200 px-4 py-2" on:click={cancelEdit} disabled={saving}>
+						Batal
+					</button>
+				{:else}
+					<button class="rounded bg-blue-600 px-4 py-2 text-white" on:click={startEdit}>
+						Edit Profil
+					</button>
+				{/if}
+				{#if error && isEditing}
+					<p class="mt-2 text-sm text-red-600">{error}</p>
+				{/if}
 			</div>
 		</div>
 
@@ -119,23 +179,16 @@
 		{#if profile.tarif}
 			<div class="rounded-lg bg-white p-6 shadow">
 				<h3 class="mb-6 text-lg font-medium text-gray-900">Informasi Tarif</h3>
-
-				<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 					<div>
 						<label class="block text-sm font-medium text-gray-500">Daya Listrik</label>
 						<p class="mt-1 text-sm text-gray-900">{profile.tarif.daya} VA</p>
 					</div>
-
 					<div>
 						<label class="block text-sm font-medium text-gray-500">Tarif per kWh</label>
 						<p class="mt-1 text-sm text-gray-900">
 							{Formatter.currency(profile.tarif.tarif_perkwh)}
 						</p>
-					</div>
-
-					<div>
-						<label class="block text-sm font-medium text-gray-500">ID Tarif</label>
-						<p class="mt-1 text-sm text-gray-900">#{profile.tarif.id_tarif}</p>
 					</div>
 				</div>
 			</div>
