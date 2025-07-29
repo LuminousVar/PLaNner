@@ -1,12 +1,14 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { apiClient } from '$lib/api/client';
+	import type { AdminDashboardStats } from '$lib/types/dashboard';
 
-	let dashboardStats = {
+	let dashboardStats: AdminDashboardStats | undefined = {
 		totalPelanggan: 0,
 		totalTagihan: 0,
 		totalPendapatan: 0,
-		tagihanBelumLunas: 0
+		tagihanBelumLunas: 0,
+		recentTagihan: []
 	};
 	let loading = true;
 
@@ -58,7 +60,9 @@
 						<div class="ml-5 w-0 flex-1">
 							<dl>
 								<dt class="truncate text-sm font-medium text-gray-500">Total Pelanggan</dt>
-								<dd class="text-lg font-medium text-gray-900">{dashboardStats.totalPelanggan}</dd>
+								<dd class="text-lg font-medium text-gray-900">
+									Rp {(dashboardStats?.totalPendapatan ?? 0).toLocaleString('id-ID')}
+								</dd>
 							</dl>
 						</div>
 					</div>
@@ -86,7 +90,9 @@
 						<div class="ml-5 w-0 flex-1">
 							<dl>
 								<dt class="truncate text-sm font-medium text-gray-500">Total Tagihan</dt>
-								<dd class="text-lg font-medium text-gray-900">{dashboardStats.totalTagihan}</dd>
+								<dd class="text-lg font-medium text-gray-900">
+									{dashboardStats?.totalTagihan ?? 0}
+								</dd>
 							</dl>
 						</div>
 					</div>
@@ -115,7 +121,7 @@
 							<dl>
 								<dt class="truncate text-sm font-medium text-gray-500">Total Pendapatan</dt>
 								<dd class="text-lg font-medium text-gray-900">
-									Rp {dashboardStats.totalPendapatan.toLocaleString('id-ID')}
+									Rp {dashboardStats?.totalPendapatan.toLocaleString('id-ID')}
 								</dd>
 							</dl>
 						</div>
@@ -144,7 +150,9 @@
 						<div class="ml-5 w-0 flex-1">
 							<dl>
 								<dt class="truncate text-sm font-medium text-gray-500">Tagihan Belum Lunas</dt>
-								<dd class="text-lg font-medium text-red-600">{dashboardStats.tagihanBelumLunas}</dd>
+								<dd class="text-lg font-medium text-red-600">
+									{dashboardStats?.tagihanBelumLunas}
+								</dd>
 							</dl>
 						</div>
 					</div>
