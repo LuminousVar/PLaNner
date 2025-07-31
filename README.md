@@ -1,38 +1,72 @@
-# sv
+# PLaNner
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A web application to help you easily manage and monitor your electricity usage.
 
-## Creating a project
+## Overview
 
-If you're seeing this, you've probably already done this step. Congrats!
+PLaNner is a web application designed to simplify your electricity transactions and provide a seamless experience in managing your power usage.
+
+## Objective
+
+To build an intuitive and responsive user interface for the PLaNner platform using Vite and Svelte, providing users with an efficient and effective way to handle their electricity-related needs.
+
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following ready:
+
+- **Bun**: A fast JavaScript all-in-one toolkit.
+- **PLaNner Backend API**: The backend for this project must be set up and running. You can find it here: [LuminousVar/backend-PLaNner](https://github.com/LuminousVar/backend-PLaNner).
+
+---
+
+## Getting Started
+
+Follow these steps to run this project in your local development environment.
+
+### Step 1: Set Up and Run the Backend
+
+This frontend application requires the backend API to be running.
+
+1.  First, clone and follow the setup instructions for the backend repository: [https://github.com/LuminousVar/backend-PLaNner](https://github.com/LuminousVar/backend-PLaNner).
+2.  Ensure the backend server is running (usually on `http://localhost:5100`) before proceeding to the next step.
+
+### Step 2: Clone This Frontend Repository
+
+Next, clone this frontend repository to your local machine.
 
 ```bash
-# create a new project in the current directory
-npx sv create
+# Using HTTPS
+git clone [https://github.com/LuminousVar/PLaNner.git](https://github.com/LuminousVar/PLaNner.git)
 
-# create a new project in my-app
-npx sv create my-app
+# Or using SSH
+git clone git@github.com:LuminousVar/PLaNner.git
+
+# Navigate into the project directory
+cd PLaNner
 ```
 
-## Developing
+### Step 3: Install Dependencies
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Use bun to install all the required packages for the project.
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+bun install
 ```
 
-## Building
+### Step 4: Run the Application
 
-To create a production version of your app:
+Run the development server for the Application
 
 ```bash
-npm run build
+bun --bun run dev
 ```
 
-You can preview the production build with `npm run preview`.
+The Vite development server will start. You can view the application in your browser.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+### Step 5: Access the Application
+
+Open the following URL in your browser to see the result:
+
+[https://localhost:5173](https://localhost:5173)
