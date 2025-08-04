@@ -30,7 +30,7 @@ Follow these steps to run this project in your local development environment.
 This frontend application requires the backend API to be running.
 
 1.  First, clone and follow the setup instructions for the backend repository: [https://github.com/LuminousVar/backend-PLaNner](https://github.com/LuminousVar/backend-PLaNner).
-2.  Ensure the backend server is running (usually on `http://localhost:5100`) before proceeding to the next step.
+2.  Ensure the backend server is running (on `http://localhost:5100`) before proceeding to the next step.
 
 ### Step 2: Clone This Frontend Repository
 
@@ -38,7 +38,7 @@ Next, clone this frontend repository to your local machine.
 
 ```bash
 # Using HTTPS
-git clone [https://github.com/LuminousVar/PLaNner.git](https://github.com/LuminousVar/PLaNner.git)
+git clone https://github.com/LuminousVar/PLaNner.git
 
 # Or using SSH
 git clone git@github.com:LuminousVar/PLaNner.git
